@@ -12,7 +12,6 @@
     "noImplicitThis": false,
     "strictNullChecks": false,
     "strict": false,
-    "suppressImplicitAnyIndexErrors": true,
     "ignoreDeprecations": "5.0"
   },
   "exclude": [

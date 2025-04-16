@@ -38,7 +38,7 @@ const AboutHero: React.FC = () => {
           About <span className="text-blue-400">PML Academy</span>
         </h1>
         <p className="font-exo text-xl md:text-2xl text-center mb-12 max-w-3xl animate-slide-up delay-100 text-gray-300">
-          Connecting ambitious students with world-class healthcare education institutions since 2015.
+          Connecting ambitious students with world-class education institutions.
         </p>
       </div>
     </div>

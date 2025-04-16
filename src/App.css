@@ -1,0 +1,9 @@
+/* Base styles */
+.App {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+/* Remove any other styles that might conflict with Tailwind */

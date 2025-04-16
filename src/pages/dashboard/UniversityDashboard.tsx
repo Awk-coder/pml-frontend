@@ -135,8 +135,6 @@ const UniversityDashboard: React.FC = () => {
                               ? "bg-green-500/10 text-green-400"
                               : app.status === "rejected"
                               ? "bg-red-500/10 text-red-400"
-                              : app.status === "reviewing"
-                              ? "bg-blue-500/10 text-blue-400"
                               : "bg-yellow-500/10 text-yellow-400"
                           }`}
                         >

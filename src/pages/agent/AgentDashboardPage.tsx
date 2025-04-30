@@ -10,7 +10,7 @@ import {
   getUsers,
   createApplication
 } from '../../services/localStorageService';
-import { FiSearch, FiUser, FiBookOpen, FiFileText } from 'react-icons/fi';
+import { FiSearch, FiUser, FiBookOpen, FiFileText, FiUsers, FiDollarSign, FiMessageSquare, FiSettings, FiPlus, FiClock, FiCheck, FiX, FiBarChart2 } from 'react-icons/fi';
 
 const AgentDashboardPage: React.FC = () => {
   const { user } = useAuth();
@@ -94,188 +94,254 @@ const AgentDashboardPage: React.FC = () => {
     return program ? program.name : 'Unknown Program';
   };
 
+  // Mock data for the dashboard
+  const mockStudents = [
+    {
+      id: "stud-1",
+      name: "John Doe",
+      email: "john.doe@example.com",
+      applications: 2,
+      status: "active",
+    },
+    {
+      id: "stud-2",
+      name: "Jane Smith",
+      email: "jane.smith@example.com",
+      applications: 1,
+      status: "pending",
+    },
+  ];
+
+  const mockApplications = [
+    {
+      id: "app-1",
+      student: "John Doe",
+      program: "Bachelor of Computer Science",
+      university: "UCMI University",
+      status: "under_review",
+      submittedDate: "2023-10-15",
+    },
+    {
+      id: "app-2",
+      student: "Jane Smith",
+      program: "Master of Business Administration",
+      university: "UCMI University",
+      status: "approved",
+      submittedDate: "2023-09-20",
+    },
+  ];
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "active":
+        return (
+          <span className="bg-green-900/60 text-green-200 px-2 py-1 rounded-full text-xs flex items-center">
+            <FiCheck className="mr-1" /> Active
+          </span>
+        );
+      case "pending":
+        return (
+          <span className="bg-yellow-900/60 text-yellow-200 px-2 py-1 rounded-full text-xs flex items-center">
+            <FiClock className="mr-1" /> Pending
+          </span>
+        );
+      case "draft":
+        return (
+          <span className="bg-gray-700 text-gray-200 px-2 py-1 rounded-full text-xs flex items-center">
+            <FiClock className="mr-1" /> Draft
+          </span>
+        );
+      case "submitted":
+        return (
+          <span className="bg-blue-900/60 text-blue-200 px-2 py-1 rounded-full text-xs flex items-center">
+            <FiFileText className="mr-1" /> Submitted
+          </span>
+        );
+      case "under_review":
+        return (
+          <span className="bg-yellow-900/60 text-yellow-200 px-2 py-1 rounded-full text-xs flex items-center">
+            <FiClock className="mr-1" /> Under Review
+          </span>
+        );
+      case "approved":
+        return (
+          <span className="bg-green-900/60 text-green-200 px-2 py-1 rounded-full text-xs flex items-center">
+            <FiCheck className="mr-1" /> Approved
+          </span>
+        );
+      case "rejected":
+        return (
+          <span className="bg-red-900/60 text-red-200 px-2 py-1 rounded-full text-xs flex items-center">
+            <FiX className="mr-1" /> Rejected
+          </span>
+        );
+      default:
+        return (
+          <span className="bg-gray-700 text-gray-200 px-2 py-1 rounded-full text-xs">
+            {status}
+          </span>
+        );
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gray-900 py-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-white font-orbitron">Agent Dashboard</h1>
-            <p className="mt-1 text-gray-400">
-              Welcome back, {user?.firstName} {user?.lastName}
-            </p>
-          </div>
-          
-          <div className="mt-4 md:mt-0 flex space-x-2">
-            <Link
-              to="/agent/profile"
-              className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
-            >
-              <FiUser className="mr-2" />
-              Profile
-            </Link>
-            <button
-              onClick={() => setShowAddApplication(true)}
-              className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700"
-            >
-              <FiFileText className="mr-2" />
-              New Application
-            </button>
-          </div>
+    <div className="min-h-screen bg-black text-white">
+      <div className="container mx-auto px-4 py-8">
+        {/* Dashboard Header */}
+        <div className="mb-8">
+          <h1 className="font-orbitron text-3xl font-bold mb-2">
+            Agent Dashboard
+          </h1>
+          <p className="text-gray-400">
+            Welcome back, {user?.firstName || "Agent"}
+          </p>
         </div>
 
-        {/* Tabs */}
-        <div className="border-b border-gray-700 mb-6">
-          <nav className="-mb-px flex space-x-8">
-            <button
-              onClick={() => setActiveTab('programs')}
-              className={`${
-                activeTab === 'programs'
-                  ? 'border-blue-500 text-blue-400'
-                  : 'border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-300'
-              } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center`}
-            >
-              <FiBookOpen className="mr-2" />
-              Available Programs
-            </button>
-            <button
-              onClick={() => setActiveTab('applications')}
-              className={`${
-                activeTab === 'applications'
-                  ? 'border-blue-500 text-blue-400'
-                  : 'border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-300'
-              } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center`}
-            >
-              <FiFileText className="mr-2" />
-              Applications
-            </button>
-          </nav>
-        </div>
-
-        {/* Search */}
-        <div className="mb-6">
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <FiSearch className="text-gray-400" />
+        {/* Stats Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div className="bg-gray-900 rounded-xl p-6">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-gray-400">Total Students</h3>
+              <FiUsers className="text-blue-400" />
             </div>
-            <input
-              type="text"
-              placeholder={activeTab === 'programs' ? "Search programs..." : "Search applications..."}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="bg-gray-800 block w-full pl-10 pr-3 py-2 border border-gray-700 rounded-md leading-5 text-gray-300 placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-            />
+            <p className="text-3xl font-bold">12</p>
+            <p className="text-green-400 text-sm mt-2">+2 this month</p>
+          </div>
+          <div className="bg-gray-900 rounded-xl p-6">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-gray-400">Applications</h3>
+              <FiFileText className="text-purple-400" />
+            </div>
+            <p className="text-3xl font-bold">18</p>
+            <p className="text-green-400 text-sm mt-2">+3 this month</p>
+          </div>
+          <div className="bg-gray-900 rounded-xl p-6">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-gray-400">Success Rate</h3>
+              <FiBarChart2 className="text-green-400" />
+            </div>
+            <p className="text-3xl font-bold">78%</p>
+            <p className="text-green-400 text-sm mt-2">+5% from last month</p>
+          </div>
+          <div className="bg-gray-900 rounded-xl p-6">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-gray-400">Commissions</h3>
+              <FiDollarSign className="text-yellow-400" />
+            </div>
+            <p className="text-3xl font-bold">$2,450</p>
+            <p className="text-green-400 text-sm mt-2">+$350 this month</p>
           </div>
         </div>
 
-        {/* Content */}
-        {activeTab === 'programs' && (
-          <div>
-            <h2 className="text-xl font-semibold text-white mb-4">Available Programs</h2>
-            
-            {filteredPrograms.length === 0 ? (
-              <div className="bg-gray-800 rounded-lg p-6 text-center">
-                <p className="text-gray-400">No programs match your search criteria.</p>
-              </div>
-            ) : (
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {filteredPrograms.map((program) => (
-                  <div key={program.id} className="bg-gray-800 rounded-lg overflow-hidden border border-gray-700">
-                    <div className="p-5">
-                      <h3 className="text-lg font-medium text-white">{program.name}</h3>
-                      <p className="text-sm text-gray-400">{program.university}</p>
-                      
-                      <div className="mt-2">
-                        <span className="text-sm text-gray-400">{program.degreeLevel} • {program.duration} years</span>
-                      </div>
-                      
-                      <p className="mt-3 text-sm text-gray-300 line-clamp-3">{program.description}</p>
-                      
-                      <div className="mt-4 flex justify-between items-center">
-                        <span className="text-sm text-gray-400">
-                          Tuition: ${program.tuition.toLocaleString()}/year
-                        </span>
-                        <button
-                          onClick={() => {
-                            setNewApplication({...newApplication, programId: program.id});
-                            setShowAddApplication(true);
-                          }}
-                          className="text-blue-400 hover:text-blue-300 text-sm"
-                        >
-                          Apply Student
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {activeTab === 'applications' && (
-          <div>
-            <h2 className="text-xl font-semibold text-white mb-4">Applications</h2>
-            
-            {filteredApplications.length === 0 ? (
-              <div className="bg-gray-800 rounded-lg p-6 text-center">
-                <p className="text-gray-400">No applications match your search criteria.</p>
-                <button
-                  onClick={() => setShowAddApplication(true)}
-                  className="mt-4 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+        {/* Dashboard Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Main Content - 2/3 width on large screens */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Students Section */}
+            <div className="bg-gray-900 rounded-xl p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="font-orbitron text-xl font-bold">My Students</h2>
+                <Link
+                  to="/agent/students/add"
+                  className="flex items-center text-blue-400 hover:text-blue-300 text-sm"
                 >
-                  Create New Application
-                </button>
+                  <FiPlus className="mr-1" /> Add Student
+                </Link>
               </div>
-            ) : (
-              <div className="bg-gray-800 rounded-lg overflow-hidden">
-                <table className="min-w-full divide-y divide-gray-700">
-                  <thead className="bg-gray-700">
-                    <tr>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                        Student
-                      </th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                        Program
-                      </th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                        Status
-                      </th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                        Submitted
-                      </th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                        Actions
-                      </th>
+
+              {mockStudents.length === 0 ? (
+                <div className="text-center py-8 bg-gray-800/50 rounded-lg">
+                  <p className="text-gray-400 mb-4">
+                    You haven't added any students yet
+                  </p>
+                  <Link
+                    to="/agent/students/add"
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg inline-flex items-center"
+                  >
+                    <FiPlus className="mr-2" /> Add Student
+                  </Link>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="text-left text-gray-400 border-b border-gray-800">
+                        <th className="pb-2">Name</th>
+                        <th className="pb-2">Email</th>
+                        <th className="pb-2">Applications</th>
+                        <th className="pb-2">Status</th>
+                        <th className="pb-2"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {mockStudents.map((student) => (
+                        <tr
+                          key={student.id}
+                          className="border-b border-gray-800 hover:bg-gray-800/30"
+                        >
+                          <td className="py-3">{student.name}</td>
+                          <td className="py-3">{student.email}</td>
+                          <td className="py-3">{student.applications}</td>
+                          <td className="py-3">
+                            {getStatusBadge(student.status)}
+                          </td>
+                          <td className="py-3 text-right">
+                            <Link
+                              to={`/agent/students/${student.id}`}
+                              className="text-blue-400 hover:text-blue-300"
+                            >
+                              View
+                            </Link>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            {/* Applications Section */}
+            <div className="bg-gray-900 rounded-xl p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="font-orbitron text-xl font-bold">
+                  Recent Applications
+                </h2>
+                <Link
+                  to="/agent/applications"
+                  className="flex items-center text-blue-400 hover:text-blue-300 text-sm"
+                >
+                  View All
+                </Link>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="text-left text-gray-400 border-b border-gray-800">
+                      <th className="pb-2">Student</th>
+                      <th className="pb-2">Program</th>
+                      <th className="pb-2">Status</th>
+                      <th className="pb-2">Submitted</th>
+                      <th className="pb-2"></th>
                     </tr>
                   </thead>
-                  <tbody className="bg-gray-800 divide-y divide-gray-700">
-                    {filteredApplications.map((application) => (
-                      <tr key={application.id}>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-white">{getStudentName(application.studentId)}</div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-300">{getProgramName(application.programId)}</div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            application.status === 'accepted' ? 'bg-green-100 text-green-800' :
-                            application.status === 'rejected' ? 'bg-red-100 text-red-800' :
-                            application.status === 'reviewing' ? 'bg-yellow-100 text-yellow-800' :
-                            'bg-blue-100 text-blue-800'
-                          }`}>
-                            {application.status.charAt(0).toUpperCase() + application.status.slice(1)}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                          {new Date(application.submittedAt).toLocaleDateString()}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                  <tbody>
+                    {mockApplications.map((app) => (
+                      <tr
+                        key={app.id}
+                        className="border-b border-gray-800 hover:bg-gray-800/30"
+                      >
+                        <td className="py-3">{app.student}</td>
+                        <td className="py-3">{app.program}</td>
+                        <td className="py-3">{getStatusBadge(app.status)}</td>
+                        <td className="py-3">{app.submittedDate}</td>
+                        <td className="py-3 text-right">
                           <Link
-                            to={`/agent/applications/${application.id}`}
+                            to={`/agent/applications/${app.id}`}
                             className="text-blue-400 hover:text-blue-300"
                           >
-                            View Details
+                            View
                           </Link>
                         </td>
                       </tr>
@@ -283,103 +349,103 @@ const AgentDashboardPage: React.FC = () => {
                   </tbody>
                 </table>
               </div>
-            )}
+            </div>
           </div>
-        )}
 
-        {/* Add Application Modal */}
-        {showAddApplication && (
-          <div className="fixed z-10 inset-0 overflow-y-auto">
-            <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-              <div className="fixed inset-0 transition-opacity" aria-hidden="true">
-                <div className="absolute inset-0 bg-gray-900 opacity-75"></div>
-              </div>
-
-              <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-
-              <div className="inline-block align-bottom bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-                <div className="bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                  <div className="sm:flex sm:items-start">
-                    <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
-                      <h3 className="text-lg leading-6 font-medium text-white">
-                        Create New Application
-                      </h3>
-                      <div className="mt-4 space-y-4">
-                        <div>
-                          <label htmlFor="student" className="block text-sm font-medium text-gray-400">
-                            Student
-                          </label>
-                          <select
-                            id="student"
-                            value={newApplication.studentId}
-                            onChange={(e) => setNewApplication({...newApplication, studentId: e.target.value})}
-                            className="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                          >
-                            <option value="">Select a student</option>
-                            {students.map(student => (
-                              <option key={student.id} value={student.id}>
-                                {student.firstName} {student.lastName} ({student.email})
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                        
-                        <div>
-                          <label htmlFor="program" className="block text-sm font-medium text-gray-400">
-                            Program
-                          </label>
-                          <select
-                            id="program"
-                            value={newApplication.programId}
-                            onChange={(e) => setNewApplication({...newApplication, programId: e.target.value})}
-                            className="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                          >
-                            <option value="">Select a program</option>
-                            {programs.map(program => (
-                              <option key={program.id} value={program.id}>
-                                {program.name} - {program.university}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                        
-                        <div>
-                          <label htmlFor="notes" className="block text-sm font-medium text-gray-400">
-                            Notes
-                          </label>
-                          <textarea
-                            id="notes"
-                            rows={3}
-                            value={newApplication.notes}
-                            onChange={(e) => setNewApplication({...newApplication, notes: e.target.value})}
-                            className="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="Add any notes about this application..."
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+          {/* Sidebar - 1/3 width on large screens */}
+          <div className="space-y-6">
+            {/* Profile Summary */}
+            <div className="bg-gray-900 rounded-xl p-6">
+              <div className="flex items-center mb-4">
+                <div className="w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center text-2xl mr-4">
+                  {user?.firstName?.[0] || "A"}
                 </div>
-                <div className="bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                  <button
-                    type="button"
-                    onClick={handleAddApplication}
-                    className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm"
+                <div>
+                  <h2 className="font-bold">
+                    {user?.firstName} {user?.lastName}
+                  </h2>
+                  <p className="text-gray-400 text-sm">{user?.email}</p>
+                </div>
+              </div>
+              <div className="border-t border-gray-800 pt-4 mt-4">
+                <Link
+                  to="/profile/agent"
+                  className="bg-gray-800 hover:bg-gray-700 text-white w-full py-2 rounded-lg flex items-center justify-center"
+                >
+                  <FiUser className="mr-2" /> Edit Profile
+                </Link>
+              </div>
+            </div>
+
+            {/* Commission Summary */}
+            <div className="bg-gray-900 rounded-xl p-6">
+              <h2 className="font-orbitron text-xl font-bold mb-4">
+                Commission Summary
+              </h2>
+              <div className="space-y-4">
+                <div className="flex justify-between">
+                  <span className="text-gray-400">This Month</span>
+                  <span className="font-bold">$350</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Last Month</span>
+                  <span className="font-bold">$420</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">This Year</span>
+                  <span className="font-bold">$2,450</span>
+                </div>
+                <div className="pt-4 mt-4 border-t border-gray-800">
+                  <Link
+                    to="/agent/commissions"
+                    className="text-blue-400 hover:text-blue-300 flex items-center justify-center"
                   >
-                    Submit Application
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowAddApplication(false)}
-                    className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-500 shadow-sm px-4 py-2 bg-gray-800 text-base font-medium text-gray-300 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-                  >
-                    Cancel
-                  </button>
+                    View Commission History
+                  </Link>
                 </div>
               </div>
             </div>
+
+            {/* Quick Links */}
+            <div className="bg-gray-900 rounded-xl p-6">
+              <h2 className="font-orbitron text-xl font-bold mb-4">
+                Quick Links
+              </h2>
+              <nav className="space-y-2">
+                <Link
+                  to="/agent/students"
+                  className="flex items-center text-gray-300 hover:text-white p-2 rounded-lg hover:bg-gray-800"
+                >
+                  <FiUsers className="mr-3" /> All Students
+                </Link>
+                <Link
+                  to="/agent/applications"
+                  className="flex items-center text-gray-300 hover:text-white p-2 rounded-lg hover:bg-gray-800"
+                >
+                  <FiFileText className="mr-3" /> All Applications
+                </Link>
+                <Link
+                  to="/agent/commissions"
+                  className="flex items-center text-gray-300 hover:text-white p-2 rounded-lg hover:bg-gray-800"
+                >
+                  <FiDollarSign className="mr-3" /> Commissions
+                </Link>
+                <Link
+                  to="/agent/messages"
+                  className="flex items-center text-gray-300 hover:text-white p-2 rounded-lg hover:bg-gray-800"
+                >
+                  <FiMessageSquare className="mr-3" /> Messages
+                </Link>
+                <Link
+                  to="/agent/settings"
+                  className="flex items-center text-gray-300 hover:text-white p-2 rounded-lg hover:bg-gray-800"
+                >
+                  <FiSettings className="mr-3" /> Settings
+                </Link>
+              </nav>
+            </div>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

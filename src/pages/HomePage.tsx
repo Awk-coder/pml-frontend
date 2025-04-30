@@ -1,20 +1,27 @@
 import React from "react";
 import HeroSection from "../components/home/HeroSection";
-import TestimonialsSection from "../components/home/TestimonialsSection";
 import CampusGallerySection from "../components/home/CampusGallerySection";
 import MasonryGallery from "../components/home/MasonryGallery";
 import ProgramsSection from "../components/home/ProgramsSection";
-import WhyChooseSection from "../components/home/WhyChooseSection";
+import CTASection from "../components/home/CTASection";
 
 const HomePage: React.FC = () => {
   return (
-    <div>
+    <div className="bg-black text-white">
+      {/* Hero Section */}
       <HeroSection />
-      <MasonryGallery className="mt-0 mb-0" />
-      <WhyChooseSection />
+
+      {/* Masonry Gallery */}
+      <MasonryGallery />
+
+      {/* Programs Section */}
       <ProgramsSection />
+
+      {/* Campus Gallery Section */}
       <CampusGallerySection />
-      {/* <TestimonialsSection /> */}
+
+      {/* CTA Section */}
+      <CTASection />
     </div>
   );
 };

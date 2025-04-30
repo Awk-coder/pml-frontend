@@ -1,136 +1,183 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
-import { FiUser, FiLock } from "react-icons/fi";
+import SquaresBackground from "../../components/layout/SquaresBackground";
+import { FiUser, FiLock, FiArrowRight } from "react-icons/fi";
+import AuthRedirect from "../../components/auth/AuthRedirect";
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState<"student" | "university" | "agent">("student");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const { signIn, isAuthenticated, profile } = useAuth();
+
+  // Get return URL from query params
+  const searchParams = new URLSearchParams(location.search);
+  const returnUrl = searchParams.get("returnUrl") || "/";
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated && profile) {
+      // Redirect based on role
+      if (profile.role === "student") {
+        navigate("/dashboard/student");
+      } else if (profile.role === "university") {
+        navigate("/dashboard/university");
+      } else if (profile.role === "agent") {
+        navigate("/dashboard/agent");
+      } else if (profile.role === "admin") {
+        navigate("/admin/dashboard");
+      } else {
+        navigate(returnUrl);
+      }
+    }
+  }, [isAuthenticated, profile, navigate, returnUrl]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setIsLoading(true);
 
+    console.log("Login attempt started");
     try {
-      await login(email, password, role);
-      
-      // Redirect to the appropriate dashboard based on role
-      switch (role) {
-        case "student":
-          navigate("/student/dashboard");
-          break;
-        case "university":
-          navigate("/university/dashboard");
-          break;
-        case "agent":
-          navigate("/agent/dashboard");
-          break;
-      }
-    } catch (err: any) {
-      setError(err.message || "Failed to log in");
+      await signIn(email, password);
+      // The auth state change and useEffect above will handle the redirect
+    } catch (error: any) {
+      console.error("Login error:", error);
+      setError(error.message || "Failed to sign in");
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-white font-orbitron">
-          Sign in
-        </h2>
-      </div>
+    <>
+      <AuthRedirect />
+      <div className="min-h-screen bg-black flex flex-col">
+        {/* Background */}
+        <div className="absolute inset-0">
+          <SquaresBackground
+            direction="diagonal"
+            speed={0.5}
+            className="opacity-30"
+          />
+        </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-gray-800 py-8 px-4 shadow sm:rounded-lg sm:px-10 border border-gray-700">
-          {error && (
-            <div className="mb-4 bg-red-500/20 border border-red-500 text-red-300 px-4 py-3 rounded">
-              {error}
-            </div>
-          )}
-
-          <form className="space-y-6" onSubmit={handleSubmit}>
-            <div>
-              <label htmlFor="role" className="block text-sm font-medium text-gray-300">
-                Account Type
-              </label>
-              <div className="mt-1">
-                <select
-                  id="role"
-                  value={role}
-                  onChange={(e) => setRole(e.target.value as "student" | "university" | "agent")}
-                  className="bg-gray-700 block w-full py-2 px-3 border border-gray-600 rounded-md shadow-sm text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="student">Student</option>
-                  <option value="university">University</option>
-                  <option value="agent">Agent</option>
-                </select>
+        {/* Content */}
+        <div className="flex-grow flex items-center justify-center relative z-10 px-4 py-12">
+          <div className="max-w-md w-full bg-gray-900 rounded-xl shadow-xl overflow-hidden">
+            <div className="p-8">
+              <div className="text-center mb-8">
+                <Link to="/" className="inline-block">
+                  <img
+                    src="/logo.svg"
+                    alt="PML Academy"
+                    className="h-12 mx-auto mb-4"
+                  />
+                </Link>
+                <h1 className="font-orbitron text-2xl text-white font-bold">
+                  Sign In
+                </h1>
+                <p className="text-gray-400 mt-2">
+                  Access your PML Academy account
+                </p>
               </div>
-            </div>
 
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-300">
-                Email
-              </label>
-              <div className="mt-1 relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FiUser className="text-gray-500" />
+              {error && (
+                <div className="mb-6 bg-red-900/40 border border-red-800 text-red-100 px-4 py-3 rounded-lg">
+                  {error}
                 </div>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="bg-gray-700 block w-full pl-10 pr-3 py-2 border border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-white"
-                  placeholder="your.email@example.com"
-                />
-              </div>
-            </div>
+              )}
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-300">
-                Password
-              </label>
-              <div className="mt-1 relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FiLock className="text-gray-500" />
+              <form onSubmit={handleSubmit}>
+                <div className="space-y-6">
+                  <div>
+                    <label
+                      htmlFor="email"
+                      className="block text-sm font-medium text-gray-400 mb-2"
+                    >
+                      Email Address
+                    </label>
+                    <div className="relative">
+                      <input
+                        id="email"
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                        className="w-full bg-gray-800 border border-gray-700 rounded-lg pl-10 pr-4 py-3 text-white focus:outline-none focus:border-blue-500"
+                        placeholder="Enter your email"
+                      />
+                      <FiUser className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between mb-2">
+                      <label
+                        htmlFor="password"
+                        className="block text-sm font-medium text-gray-400"
+                      >
+                        Password
+                      </label>
+                      <Link
+                        to="/reset-password"
+                        className="text-sm text-blue-400 hover:text-blue-300"
+                      >
+                        Forgot password?
+                      </Link>
+                    </div>
+                    <div className="relative">
+                      <input
+                        id="password"
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        className="w-full bg-gray-800 border border-gray-700 rounded-lg pl-10 pr-4 py-3 text-white focus:outline-none focus:border-blue-500"
+                        placeholder="Enter your password"
+                      />
+                      <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    className={`w-full flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors ${
+                      isLoading ? "opacity-70 cursor-not-allowed" : ""
+                    }`}
+                  >
+                    {isLoading ? (
+                      "Signing in..."
+                    ) : (
+                      <>
+                        Sign In <FiArrowRight className="ml-2" />
+                      </>
+                    )}
+                  </button>
                 </div>
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  autoComplete="current-password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="bg-gray-700 block w-full pl-10 pr-3 py-2 border border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-white"
-                  placeholder="••••••••"
-                />
+              </form>
+
+              <div className="mt-8 text-center">
+                <p className="text-gray-400">
+                  Don't have an account?{" "}
+                  <Link
+                    to="/register"
+                    className="text-blue-400 hover:text-blue-300"
+                  >
+                    Sign up
+                  </Link>
+                </p>
               </div>
             </div>
-
-            <div>
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isLoading ? "Signing in..." : "Sign in"}
-              </button>
-            </div>
-          </form>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

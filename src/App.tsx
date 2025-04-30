@@ -1,71 +1,99 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
+import { QueryProvider } from "./providers/QueryProvider";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 import ErrorBoundary from "./components/error/ErrorBoundary";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
+import Layout from "./components/layout/Layout";
+import AuthStateHandler from "./components/auth/AuthStateHandler";
+import ProfileBypass from "./components/auth/ProfileBypass";
+
+// Public pages
 import HomePage from "./pages/HomePage";
 import ProgramsPage from "./pages/ProgramsPage";
 import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
+import UniversitiesPage from "./pages/UniversitiesPage";
+import TermsPage from "./pages/TermsPage";
+import PrivacyPage from "./pages/PrivacyPage";
 import NotFoundPage from "./pages/NotFoundPage";
+import UnderDevelopmentPage from "./pages/UnderDevelopmentPage";
+
+// Test auth pages
+// import TestLoginPage from "./pages/auth/TestLoginPage";
+// import TestRegisterLandingPage from "./pages/auth/TestRegisterLandingPage";
+
+// Regular auth pages
 import LoginPage from "./pages/auth/LoginPage";
-import RegisterPage from "./pages/auth/RegisterPage";
-import RequestResetPage from "./pages/auth/RequestResetPage";
-import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
-import GoogleCallback from "./pages/auth/GoogleCallback";
-import DashboardPage from "./pages/dashboard/DashboardPage";
-import ApplyAsUniversity from "./pages/universities/ApplyAsUniversity";
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import AdminLoginPage from "./pages/admin/AdminLoginPage";
-import "./App.css";
-import "./temp.css";
-import Layout from "./components/layout/Layout";
-import ProgramDetailsPage from "./pages/ProgramDetailsPage";
-import ApplyPage from "./pages/apply/ApplyPage";
-import AcademicBackgroundPage from "./pages/apply/AcademicBackgroundPage";
-import { QueryProvider } from "./providers/QueryProvider";
-import UniversityDashboard from "./pages/university/UniversityDashboard";
-import StudentDashboard from "./pages/student/StudentDashboard";
-import AgentDashboard from "./pages/agent/AgentDashboard";
-import UniversityLoginPage from "./pages/university/UniversityLoginPage";
-import StudentLoginPage from "./pages/student/StudentLoginPage";
-import AgentLoginPage from "./pages/agent/AgentLoginPage";
+import RegisterLandingPage from "./pages/auth/RegisterLandingPage";
 import StudentRegistrationPage from "./pages/auth/StudentRegistrationPage";
 import UniversityRegistrationPage from "./pages/auth/UniversityRegistrationPage";
 import AgentRegistrationPage from "./pages/auth/AgentRegistrationPage";
 import RegistrationSuccessPage from "./pages/auth/RegistrationSuccessPage";
-import RegisterLandingPage from "./pages/auth/RegisterLandingPage";
-import StudentProfilePage from "./pages/student/StudentProfilePage";
-import UniversityProfilePage from "./pages/university/UniversityProfilePage";
-import AgentProfilePage from "./pages/agent/AgentProfilePage";
-import ProgramDetail from "./pages/student/ProgramDetail";
-import ApplicationDetail from "./pages/student/ApplicationDetail";
-import ProgramDetailPage from "./pages/ProgramDetailPage";
-import { GoogleOAuthProvider } from "@react-oauth/google";
+import RequestResetPage from "./pages/auth/RequestResetPage";
+import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
+import GoogleCallback from "./pages/auth/GoogleCallback";
 import GoogleRoleSelectionPage from "./pages/auth/GoogleRoleSelectionPage";
-import UniversitiesPage from "./pages/UniversitiesPage";
-import TermsPage from "./pages/TermsPage";
-import PrivacyPage from "./pages/PrivacyPage";
+import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
+import AuthCallbackPage from "./pages/auth/AuthCallbackPage";
+
+// Dashboard pages
 import StudentDashboardPage from "./pages/student/StudentDashboardPage";
-import UniversityDashboardPage from "./pages/university/UniversityDashboardPage";
 import AgentDashboardPage from "./pages/agent/AgentDashboardPage";
+import UniversityDashboardPage from "./pages/university/UniversityDashboardPage";
 import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
 
 const App: React.FC = () => {
   return (
-    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || ""}>
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
       <ErrorBoundary>
         <QueryProvider>
           <AuthProvider>
+            <AuthStateHandler />
+            <ProfileBypass />
             <Layout>
               <Routes>
+                {/* Public routes */}
                 <Route path="/" element={<HomePage />} />
                 <Route path="/programs" element={<ProgramsPage />} />
-                <Route path="/programs/:id" element={<ProgramDetailPage />} />
                 <Route path="/about" element={<AboutPage />} />
                 <Route path="/contact" element={<ContactPage />} />
-                <Route path="/auth/login" element={<LoginPage />} />
-                <Route path="/auth/register" element={<RegisterPage />} />
+                <Route path="/universities" element={<UniversitiesPage />} />
+                <Route path="/terms" element={<TermsPage />} />
+                <Route path="/privacy" element={<PrivacyPage />} />
+                <Route
+                  path="/under-development"
+                  element={<UnderDevelopmentPage />}
+                />
+
+                {/* Test Auth routes */}
+                <Route path="/login" element={<LoginPage />} />
+                <Route
+                  path="/register/landing"
+                  element={<RegisterLandingPage />}
+                />
+
+                {/* Registration routes */}
+                <Route path="/register" element={<RegisterLandingPage />} />
+                <Route
+                  path="/register/student"
+                  element={<StudentRegistrationPage />}
+                />
+                <Route
+                  path="/register/university"
+                  element={<UniversityRegistrationPage />}
+                />
+                <Route
+                  path="/register/agent"
+                  element={<AgentRegistrationPage />}
+                />
+                <Route
+                  path="/registration-success"
+                  element={<RegistrationSuccessPage />}
+                />
+
+                {/* Password reset routes */}
                 <Route
                   path="/auth/reset-password"
                   element={<RequestResetPage />}
@@ -75,133 +103,87 @@ const App: React.FC = () => {
                   element={<ResetPasswordPage />}
                 />
                 <Route
-                  path="/auth/google/callback"
-                  element={<GoogleCallback />}
+                  path="/forgot-password"
+                  element={<ForgotPasswordPage />}
                 />
 
-                {/* Protected Routes */}
+                {/* OAuth callback routes */}
                 <Route
-                  path="/dashboard"
-                  element={
-                    <ProtectedRoute>
-                      <DashboardPage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route path="/admin/login" element={<AdminLoginPage />} />
-                <Route
-                  path="/admin/dashboard"
-                  element={
-                    <ProtectedRoute checkRole="admin">
-                      <AdminDashboardPage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/universities/apply"
-                  element={<ApplyAsUniversity />}
-                />
-                <Route path="/programs/:id" element={<ProgramDetailsPage />} />
-                <Route path="/apply" element={<ApplyPage />} />
-                <Route
-                  path="/apply/academic-background"
-                  element={<AcademicBackgroundPage />}
-                />
-                <Route
-                  path="/university/login"
-                  element={<Navigate to="/auth/login" />}
-                />
-                <Route
-                  path="/university/dashboard"
-                  element={
-                    <ProtectedRoute checkRole="university">
-                      <UniversityDashboardPage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/student/login"
-                  element={<Navigate to="/auth/login" />}
-                />
-                <Route
-                  path="/student/dashboard"
-                  element={
-                    <ProtectedRoute checkRole="student">
-                      <StudentDashboardPage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/agent/login"
-                  element={<Navigate to="/auth/login" />}
-                />
-                <Route
-                  path="/agent/dashboard"
-                  element={
-                    <ProtectedRoute checkRole="agent">
-                      <AgentDashboardPage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/auth/register/student"
-                  element={<Navigate to="/auth/register" />}
-                />
-                <Route
-                  path="/auth/register/university"
-                  element={<Navigate to="/auth/register" />}
-                />
-                <Route
-                  path="/auth/register/agent"
-                  element={<Navigate to="/auth/register" />}
-                />
-                <Route
-                  path="/auth/registration-success"
-                  element={<RegistrationSuccessPage />}
-                />
-                <Route
-                  path="/student/profile"
-                  element={
-                    <ProtectedRoute checkRole="student">
-                      <StudentProfilePage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/university/profile"
-                  element={
-                    <ProtectedRoute checkRole="university">
-                      <UniversityProfilePage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/agent/profile"
-                  element={
-                    <ProtectedRoute checkRole="agent">
-                      <AgentProfilePage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/student/programs/:programId"
-                  element={<ProgramDetail />}
-                />
-                <Route
-                  path="/student/applications/:applicationId"
-                  element={
-                    <ProtectedRoute checkRole="student">
-                      <ApplicationDetail />
-                    </ProtectedRoute>
-                  }
+                  path="/auth/google/callback"
+                  element={<GoogleCallback />}
                 />
                 <Route
                   path="/auth/select-role"
                   element={<GoogleRoleSelectionPage />}
                 />
-                <Route path="/universities" element={<UniversitiesPage />} />
-                <Route path="/terms" element={<TermsPage />} />
-                <Route path="/privacy" element={<PrivacyPage />} />
+                <Route path="/auth/callback" element={<AuthCallbackPage />} />
+
+                {/* Student dashboard routes */}
+                <Route
+                  path="/dashboard/student"
+                  element={
+                    <ProtectedRoute requiredRole="student">
+                      <StudentDashboardPage />
+                    </ProtectedRoute>
+                  }
+                />
+
+                {/* University dashboard routes */}
+                <Route
+                  path="/dashboard/university"
+                  element={
+                    <ProtectedRoute requiredRole="university">
+                      <UniversityDashboardPage />
+                    </ProtectedRoute>
+                  }
+                />
+
+                {/* Agent dashboard routes */}
+                <Route
+                  path="/dashboard/agent"
+                  element={
+                    <ProtectedRoute requiredRole="agent">
+                      <AgentDashboardPage />
+                    </ProtectedRoute>
+                  }
+                />
+
+                {/* Admin dashboard routes */}
+                <Route
+                  path="/admin/dashboard"
+                  element={
+                    <ProtectedRoute requiredRole="admin">
+                      <AdminDashboardPage />
+                    </ProtectedRoute>
+                  }
+                />
+
+                {/* Debug route */}
+                <Route
+                  path="/debug"
+                  element={
+                    <div className="min-h-screen bg-red-900 flex items-center justify-center">
+                      <h1 className="text-white text-4xl">
+                        Debug Route Works!
+                      </h1>
+                    </div>
+                  }
+                />
+
+                {/* Special debug route */}
+                <Route
+                  path="/special-debug-123456789"
+                  element={
+                    <div className="min-h-screen bg-green-900 flex items-center justify-center">
+                      <h1 className="text-white text-4xl">
+                        Special Debug Route Works!
+                      </h1>
+                    </div>
+                  }
+                />
+
+                {/* Fallback routes */}
+                <Route path="/404" element={<NotFoundPage />} />
                 <Route path="*" element={<NotFoundPage />} />
               </Routes>
             </Layout>

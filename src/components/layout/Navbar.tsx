@@ -1,23 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
-// Comment out the problematic import
-// import { useAuth } from "../../contexts/AuthContext";
-import { FiMenu, FiX, FiUser, FiLogOut, FiLogIn } from "react-icons/fi";
-import logo from "../../assets/pmllogo2.png";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
+import { FiMenu, FiX, FiUser, FiLogOut, FiHome } from "react-icons/fi";
+import Logo from "../../components/common/Logo";
+import { signOutUser } from "../../utils/authUtils";
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  // Comment out the problematic hook usage
-  // const { user, logout } = useAuth();
+  const { isAuthenticated, profile, signOut, setIsAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  
-  // For now, use a placeholder value
-  const isAuthenticated = false;
-  const user = null;
-  const logout = () => console.log("Logout clicked");
 
   // Close mobile menu when route changes
   useEffect(() => {
@@ -25,7 +19,7 @@ const Navbar: React.FC = () => {
     setIsProfileOpen(false);
   }, [location.pathname]);
 
-  // Add scroll event listener
+  // Handle scroll effect
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
@@ -35,235 +29,208 @@ const Navbar: React.FC = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleLogout = () => {
-    logout();
-    navigate("/");
+  // Handle dashboard navigation
+  const handleDashboardClick = () => {
+    if (profile && profile.role) {
+      navigate(`/dashboard/${profile.role}`);
+    } else {
+      // Fallback to student dashboard if role not known
+      navigate("/dashboard/student");
+      console.warn("User profile or role not found, using default dashboard");
+    }
   };
 
-  const getDashboardLink = () => {
-    if (!user) return "/login";
+  // Replace your existing sign out function with this:
+  const handleSignOut = async (e) => {
+    e.preventDefault();
+    console.log("Sign out button clicked");
+    await signOutUser();
+  };
 
-    switch (user.role) {
-      case "student":
-        return "/student/dashboard";
-      case "university":
-        return "/university/dashboard";
-      case "agent":
-        return "/agent/dashboard";
-      case "admin":
-        return "/admin/dashboard";
-      default:
-        return "/login";
-    }
+  // Function to determine active link class
+  const linkClasses = (path: string) => {
+    const isActive = location.pathname === path;
+    return `text-sm font-medium px-3 py-2 rounded-lg transition-colors ${
+      isActive
+        ? "text-white bg-gray-800"
+        : "text-gray-300 hover:text-white hover:bg-gray-800/50"
+    }`;
   };
 
   return (
     <nav
-      className={`fixed w-full z-50 transition-all duration-300 ${
-        isScrolled
-          ? "bg-gray-900/95 backdrop-blur-sm shadow-lg"
-          : "bg-transparent"
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        isScrolled ? "bg-black/90 backdrop-blur-sm py-2" : "bg-transparent py-4"
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-20">
-          <div className="flex items-center">
-            <Link to="/" className="flex-shrink-0 flex items-center">
-              <img className="h-16 w-auto" src={logo} alt="PML Academy" />
+      <div className="container mx-auto px-4">
+        <div className="flex justify-between items-center">
+          {/* Logo - Fixed: Don't wrap Logo in Link when Logo already has linkTo */}
+          <Logo linkTo="/" />
+
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center space-x-1">
+            <Link to="/" className={linkClasses("/")}>
+              Home
+            </Link>
+            <Link to="/programs" className={linkClasses("/programs")}>
+              Programs
+            </Link>
+            <Link to="/universities" className={linkClasses("/universities")}>
+              Universities
+            </Link>
+            <Link to="/about" className={linkClasses("/about")}>
+              About
+            </Link>
+            <Link to="/contact" className={linkClasses("/contact")}>
+              Contact
             </Link>
           </div>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex md:items-center md:space-x-6">
-            <Link
-              to="/"
-              className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
-            >
-              Home
-            </Link>
-            <Link
-              to="/programs"
-              className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
-            >
-              Programs
-            </Link>
-            <Link
-              to="/universities"
-              className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
-            >
-              Universities
-            </Link>
-            <Link
-              to="/about"
-              className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
-            >
-              About
-            </Link>
-            <Link
-              to="/contact"
-              className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
-            >
-              Contact
-            </Link>
-
-            {user ? (
+          {/* Desktop Auth Buttons */}
+          <div className="hidden md:flex items-center space-x-4">
+            {isAuthenticated ? (
               <div className="relative">
                 <button
                   onClick={() => setIsProfileOpen(!isProfileOpen)}
-                  className="flex items-center text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium focus:outline-none"
+                  className="flex items-center space-x-2 text-white hover:text-blue-400 transition-colors"
                 >
-                  <FiUser className="mr-1" />
-                  <span>{user.firstName}</span>
+                  <span>{profile?.first_name}</span>
+                  <FiUser />
                 </button>
 
                 {isProfileOpen && (
-                  <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-gray-800 ring-1 ring-black ring-opacity-5">
-                    <div
-                      className="py-1"
-                      role="menu"
-                      aria-orientation="vertical"
+                  <div className="absolute right-0 mt-2 w-48 bg-gray-900 rounded-lg shadow-lg py-1 z-10 border border-gray-800">
+                    <button
+                      onClick={handleDashboardClick}
+                      className="flex items-center w-full px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white"
                     >
-                      <Link
-                        to={getDashboardLink()}
-                        className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
-                        role="menuitem"
-                      >
-                        Dashboard
-                      </Link>
-                      <Link
-                        to={`/${user.role}/profile`}
-                        className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
-                        role="menuitem"
-                      >
-                        Profile
-                      </Link>
-                      <button
-                        onClick={handleLogout}
-                        className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
-                        role="menuitem"
-                      >
-                        <div className="flex items-center">
-                          <FiLogOut className="mr-2" />
-                          Logout
-                        </div>
-                      </button>
-                    </div>
+                      <FiHome className="mr-2" />
+                      Dashboard
+                    </button>
+                    <button
+                      onClick={handleSignOut}
+                      className="flex items-center w-full px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white"
+                    >
+                      <FiLogOut className="mr-2" />
+                      Sign Out
+                    </button>
                   </div>
                 )}
               </div>
             ) : (
-              <div className="flex items-center space-x-2">
-                <Link
-                  to="/auth/login"
-                  className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium flex items-center"
+              <>
+                <button
+                  className="text-white hover:text-blue-400 py-2 transition-colors"
+                  onClick={() => navigate("/login")}
                 >
-                  <FiLogIn className="mr-1" />
-                  Login
-                </Link>
-                <Link
-                  to="/auth/register"
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+                  Log In
+                </button>
+                <button
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors inline-block"
+                  onClick={() => navigate("/register/landing")}
                 >
-                  Register
-                </Link>
-              </div>
+                  Sign Up
+                </button>
+              </>
             )}
           </div>
 
-          {/* Mobile menu button */}
-          <div className="flex md:hidden items-center">
+          {/* Mobile Menu Button */}
+          <div className="md:hidden">
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none"
-              aria-expanded="false"
+              className="text-white hover:text-blue-400 transition-colors"
             >
-              <span className="sr-only">Open main menu</span>
               {isOpen ? (
-                <FiX className="block h-6 w-6" />
+                <FiX className="h-6 w-6" />
               ) : (
-                <FiMenu className="block h-6 w-6" />
+                <FiMenu className="h-6 w-6" />
               )}
             </button>
           </div>
         </div>
       </div>
 
-      {/* Mobile menu */}
+      {/* Mobile Menu */}
       {isOpen && (
-        <div className="md:hidden bg-gray-900/95 backdrop-blur-sm shadow-lg">
-          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            <Link
-              to="/"
-              className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium"
-            >
-              Home
-            </Link>
-            <Link
-              to="/programs"
-              className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium"
-            >
-              Programs
-            </Link>
-            <Link
-              to="/universities"
-              className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium"
-            >
-              Universities
-            </Link>
-            <Link
-              to="/about"
-              className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium"
-            >
-              About
-            </Link>
-            <Link
-              to="/contact"
-              className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium"
-            >
-              Contact
-            </Link>
+        <div className="md:hidden bg-gray-900/95 backdrop-blur-sm mt-2">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex flex-col space-y-2">
+              <Link
+                to="/"
+                className="text-white hover:bg-gray-800 px-3 py-2 rounded-lg"
+                onClick={() => setIsOpen(false)}
+              >
+                Home
+              </Link>
+              <Link
+                to="/programs"
+                className="text-white hover:bg-gray-800 px-3 py-2 rounded-lg"
+                onClick={() => setIsOpen(false)}
+              >
+                Programs
+              </Link>
+              <Link
+                to="/universities"
+                className="text-white hover:bg-gray-800 px-3 py-2 rounded-lg"
+                onClick={() => setIsOpen(false)}
+              >
+                Universities
+              </Link>
+              <Link
+                to="/about"
+                className="text-white hover:bg-gray-800 px-3 py-2 rounded-lg"
+                onClick={() => setIsOpen(false)}
+              >
+                About
+              </Link>
+              <Link
+                to="/contact"
+                className="text-white hover:bg-gray-800 px-3 py-2 rounded-lg"
+                onClick={() => setIsOpen(false)}
+              >
+                Contact
+              </Link>
 
-            {user ? (
-              <>
-                <Link
-                  to={getDashboardLink()}
-                  className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium"
-                >
-                  Dashboard
-                </Link>
-                <Link
-                  to={`/${user.role}/profile`}
-                  className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium"
-                >
-                  Profile
-                </Link>
-                <button
-                  onClick={handleLogout}
-                  className="text-gray-300 hover:text-white block w-full text-left px-3 py-2 rounded-md text-base font-medium"
-                >
-                  <div className="flex items-center">
-                    <FiLogOut className="mr-2" />
-                    Logout
+              <div className="pt-4 border-t border-gray-800">
+                {isAuthenticated ? (
+                  <>
+                    <button
+                      onClick={handleDashboardClick}
+                      className="w-full text-left flex items-center text-white hover:bg-gray-800 px-3 py-2 rounded-lg"
+                    >
+                      <FiHome className="mr-2" />
+                      Dashboard
+                    </button>
+                    <button
+                      onClick={handleSignOut}
+                      className="w-full text-left flex items-center text-white hover:bg-gray-800 px-3 py-2 rounded-lg"
+                    >
+                      <FiLogOut className="mr-2" />
+                      Sign Out
+                    </button>
+                  </>
+                ) : (
+                  <div className="flex flex-col space-y-2">
+                    <button
+                      className="text-white hover:bg-gray-800 px-3 py-2 rounded-lg text-left"
+                      onClick={() => {
+                        navigate("/login");
+                      }}
+                    >
+                      Log In
+                    </button>
+                    <button
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-left"
+                      onClick={() => navigate("/register/landing")}
+                    >
+                      Sign Up
+                    </button>
                   </div>
-                </button>
-              </>
-            ) : (
-              <div className="space-y-1">
-                <Link
-                  to="/auth/login"
-                  className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium flex items-center"
-                >
-                  <FiLogIn className="mr-2" />
-                  Login
-                </Link>
-                <Link
-                  to="/auth/register"
-                  className="bg-blue-600 hover:bg-blue-700 text-white block px-3 py-2 rounded-md text-base font-medium"
-                >
-                  Register
-                </Link>
+                )}
               </div>
-            )}
+            </div>
           </div>
         </div>
       )}

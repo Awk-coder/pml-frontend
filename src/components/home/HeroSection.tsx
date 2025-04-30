@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
 
 const HeroSection: React.FC = () => {
   const navigate = useNavigate();
+  const { isAuthenticated, profile } = useAuth();
   const [activeImageIndex, setActiveImageIndex] = useState(0);
 
   // University images for the showcase - using local images
@@ -40,6 +42,28 @@ const HeroSection: React.FC = () => {
     return () => clearInterval(interval);
   }, [universityImages.length]);
 
+  // Function to navigate to the appropriate dashboard based on user role
+  const navigateToDashboard = () => {
+    if (!isAuthenticated || !profile) return;
+
+    switch (profile.role) {
+      case "student":
+        navigate("/dashboard/student");
+        break;
+      case "university":
+        navigate("/dashboard/university");
+        break;
+      case "agent":
+        navigate("/dashboard/agent");
+        break;
+      case "admin":
+        navigate("/admin/dashboard");
+        break;
+      default:
+        navigate("/");
+    }
+  };
+
   return (
     <div className="relative min-h-screen bg-black overflow-hidden">
       {/* Background Image Carousel */}
@@ -58,7 +82,7 @@ const HeroSection: React.FC = () => {
             />
           </div>
         ))}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/0 to-black/60"></div>
       </div>
 
       {/* Hero Content */}
@@ -72,18 +96,29 @@ const HeroSection: React.FC = () => {
           life-changing educational opportunities.
         </p>
         <div className="flex flex-col sm:flex-row gap-6 animate-slide-up delay-200">
-          <button
-            onClick={() => navigate("/programs")}
-            className="font-space px-10 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-lg font-medium tracking-wider"
-          >
-            Explore Programs
-          </button>
-          <button
-            onClick={() => navigate("/contact")}
-            className="font-space px-10 py-4 bg-transparent border-2 border-white text-white rounded-lg hover:bg-white/10 transition-colors text-lg font-medium tracking-wider"
-          >
-            Contact Us
-          </button>
+          {isAuthenticated ? (
+            <button
+              onClick={navigateToDashboard}
+              className="font-space px-10 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-lg font-medium tracking-wider"
+            >
+              Go to Dashboard
+            </button>
+          ) : (
+            <>
+              <button
+                onClick={() => navigate("/programs")}
+                className="font-space px-10 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-lg font-medium tracking-wider"
+              >
+                Explore Programs
+              </button>
+              <button
+                onClick={() => navigate("/contact")}
+                className="font-space px-10 py-4 bg-transparent border-2 border-white text-white rounded-lg hover:bg-white/10 transition-colors text-lg font-medium tracking-wider"
+              >
+                Contact Us
+              </button>
+            </>
+          )}
         </div>
 
         {/* Image Indicators */}
